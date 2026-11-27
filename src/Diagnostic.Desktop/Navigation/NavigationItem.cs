@@ -2,4 +2,6 @@ using Diagnostic.Desktop.ViewModels;
 
 namespace Diagnostic.Desktop.Navigation;
 
-public sealed record NavigationItem(string Key, string Title, Func<ViewModelBase> CreateViewModel);
+/// <param name="Key">Stable identifier used for navigation.</param>
+/// <param name="TitleKey">Localization key of the title (see Resources/Strings).</param>
+public sealed record NavigationItem(string Key, string TitleKey, Func<ViewModelBase> CreateViewModel);

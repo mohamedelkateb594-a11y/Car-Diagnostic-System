@@ -6,13 +6,17 @@ namespace Diagnostic.Desktop.ViewModels;
 /// </summary>
 public sealed class PlaceholderViewModel : ViewModelBase
 {
-    public PlaceholderViewModel(string title, string taskReference)
+    public PlaceholderViewModel(string titleKey, string? taskReference)
     {
-        Title = title;
-        Message = $"This screen is not implemented yet ({taskReference}).";
+        TitleKey = titleKey;
+        TaskReference = taskReference;
     }
 
-    public string Title { get; }
+    /// <summary>Localization key of the screen title.</summary>
+    public string TitleKey { get; }
 
-    public string Message { get; }
+    /// <summary>Task id from TASKS.md, or null when the screen has none.</summary>
+    public string? TaskReference { get; }
+
+    public bool HasTaskReference => !string.IsNullOrEmpty(TaskReference);
 }

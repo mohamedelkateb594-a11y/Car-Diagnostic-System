@@ -3,7 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:Diagnostic.Desktop.ViewModels"
         xmlns:views="clr-namespace:Diagnostic.Desktop.Views"
-        Title="Car Diagnostic System"
+        xmlns:services="clr-namespace:Diagnostic.Desktop.Services"
+        Title="{Binding [AppTitle], Source={x:Static services:LocalizationService.Instance}}"
+        FlowDirection="{Binding FlowDirection, Source={x:Static services:LocalizationService.Instance}}"
         Width="1100" Height="700" MinWidth="800" MinHeight="500"
         Background="{DynamicResource Brush.Window.Background}">
 
@@ -21,20 +23,36 @@
 
         <Border Grid.Column="0" Background="{DynamicResource Brush.Nav.Background}">
             <DockPanel LastChildFill="True">
-                <Button DockPanel.Dock="Bottom"
-                        Margin="12"
-                        Content="Toggle theme"
-                        Command="{Binding ToggleThemeCommand}"
-                        Style="{StaticResource Button.Default}" />
+                <StackPanel DockPanel.Dock="Bottom" Margin="12">
+                    <Button Content="{Binding [ToggleTheme], Source={x:Static services:LocalizationService.Instance}}"
+                            Command="{Binding ToggleThemeCommand}"
+                            Style="{StaticResource Button.Default}" />
+                    <Button Margin="0,8,0,0"
+                            Content="{Binding [ToggleLanguage], Source={x:Static services:LocalizationService.Instance}}"
+                            Command="{Binding ToggleLanguageCommand}"
+                            Style="{StaticResource Button.Default}" />
+                </StackPanel>
                 <TextBlock DockPanel.Dock="Top"
                            Margin="16,20,16,16"
-                           Text="Car Diagnostic"
+                           Text="{Binding [AppHeader], Source={x:Static services:LocalizationService.Instance}}"
                            Style="{StaticResource Text.Title}"
                            FontSize="18" />
                 <ListBox ItemsSource="{Binding Navigation.Items}"
                          SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
-                         DisplayMemberPath="Title"
-                         Style="{StaticResource NavListBox}" />
+                         Style="{StaticResource NavListBox}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource LocalizeConverter}">
+                                        <Binding Path="TitleKey" />
+                                        <Binding Path="Revision" Source="{x:Static services:LocalizationService.Instance}" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </DockPanel>
         </Border>
 

@@ -10,7 +10,7 @@ public class MainViewModelTests
     private static (MainViewModel ViewModel, NavigationService Navigation) Create()
     {
         var navigation = new NavigationService();
-        var viewModel = new MainViewModel(navigation, new ThemeService());
+        var viewModel = new MainViewModel(navigation, new ThemeService(), new LocalizationService());
         return (viewModel, navigation);
     }
 
@@ -25,7 +25,7 @@ public class MainViewModelTests
     }
 
     [Fact]
-    public void SelectingItem_NavigatesToPlaceholderThatSaysNotImplemented()
+    public void SelectingItem_NavigatesToPlaceholderWithTitleKeyAndTaskReference()
     {
         var (viewModel, navigation) = Create();
 
@@ -33,7 +33,28 @@ public class MainViewModelTests
 
         Assert.Equal("dtc", navigation.CurrentKey);
         var placeholder = Assert.IsType<PlaceholderViewModel>(navigation.Current);
-        Assert.Equal("Fault Codes (DTC)", placeholder.Title);
-        Assert.Contains("not implemented", placeholder.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("NavDtc", placeholder.TitleKey);
+        Assert.Equal("C-104", placeholder.TaskReference);
+        Assert.True(placeholder.HasTaskReference);
+    }
+
+    [Fact]
+    public void Dashboard_HasNoTaskReference()
+    {
+        var (_, navigation) = Create();
+
+        var placeholder = Assert.IsType<PlaceholderViewModel>(navigation.Current);
+        Assert.Null(placeholder.TaskReference);
+        Assert.False(placeholder.HasTaskReference);
+    }
+
+    [Fact]
+    public void AllNavigationTitleKeysAreDistinct()
+    {
+        var (_, navigation) = Create();
+
+        var keys = navigation.Items.Select(item => item.TitleKey).ToList();
+
+        Assert.Equal(keys.Count, keys.Distinct().Count());
     }
 }
