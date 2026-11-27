@@ -20,7 +20,7 @@ class Search(unittest.TestCase):
         self.assertEqual(search_vehicles(self.c, make="%"), [])
     def test_source_and_license_on_results(self):
         for r in search_vehicles(self.c):
-            self.assertTrue(r["license"]); self.assertEqual(r["verification"], "sample_unverified")
+            self.assertTrue(r["license"]); self.assertEqual(r["verification"], "cross_checked")
     def test_profile_and_dtc(self):
         vid = search_vehicles(self.c, make="Ford")[0]["variant_id"]
         p = get_vehicle_profile(self.c, vid)
@@ -28,6 +28,13 @@ class Search(unittest.TestCase):
         self.assertIsNone(get_vehicle_profile(self.c, 99999))
         self.assertIn("misfire", lookup_dtc(self.c, "p0300")["description"].lower())
         self.assertIsNone(lookup_dtc(self.c, "P9999"))
+    def test_documented_vehicle_facts(self):
+        # facts confirmed against public sources on 2026-11-27 (see data_sources.notes)
+        one = lambda **k: search_vehicles(self.c, **k)[0]
+        self.assertEqual(one(engine="M1DA")["displacement_cc"], 998)
+        self.assertEqual(one(engine="CZCA")["year_from"], 2014)
+        self.assertIsNone(one(engine="M20A-FKS")["year_to"])
+        self.assertEqual(len(search_vehicles(self.c, make="Toyota", year=2025)), 2)
     def test_risk_levels_present(self):
         p = get_vehicle_profile(self.c, search_vehicles(self.c)[0]["variant_id"])
         risk = {s["name"]: s["risk_level"] for s in p["services"]}
@@ -58,10 +65,11 @@ class Import(unittest.TestCase):
         p = self.payload()
         p["dtcs"].append({"code": "X123", "description": "", "source": "nope"})
         p["pids"].append({"service": 1, "pid": 300, "name": "x", "num_bytes": 1, "formula": "__import__('os')", "source": "sae-j1979-pids"})
-        p["manufacturers"][0]["models"][0]["variants"].append({"year_from": 2020, "year_to": 2010, "engine_code": "X", "source": "sample-vehicles"})
+        p["manufacturers"][0]["models"][0]["variants"].append({"year_from": 2020, "year_to": 2010, "engine_code": "X", "source": "toyota-corolla-e210"})
         p["sources"].append({"key": "nolic", "name": "n", "verification": "verified"})
+        p["sources"].append({"key": "nourl", "name": "n", "license": "x", "verification": "cross_checked"})
         errs = validate_payload(p)
-        for frag in ("invalid code format", "missing description", "unknown/missing source", "pid out of range", "bad formula", "bad year_to", "missing license"):
+        for frag in ("invalid code format", "missing description", "unknown/missing source", "pid out of range", "bad formula", "bad year_to", "missing license", "requires url"):
             self.assertTrue(any(frag in e for e in errs), frag)
     def test_atomic_rollback(self):
         c = connect(); init_db(c)

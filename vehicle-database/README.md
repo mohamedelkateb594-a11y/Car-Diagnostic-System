@@ -9,10 +9,19 @@ get_vehicle_profile(c, variant_id)      # ECUs + services (risk_level read/write
 lookup_dtc(c, "P0300")
 apply_update_package(c, pkg)            # runtime data update, no app rebuild
 ```
-Import payload: see `vehicle_db/seed/seed_data.json`. Every record needs `source` (key into `sources`, which requires `license` and `verification`).
+Import payload: see `vehicle_db/seed/seed_data.json`. Every record needs `source` (key into `sources`, which requires `license` and `verification`). Sources marked `cross_checked` or `verified` must also have `url`, `retrieved_at` and `notes` (enforced by the validator).
 
-## Data status (important)
-- PIDs / DTC codes / UDS services+DIDs / CAN IDs: standardized identifiers; descriptions are project-written. Verify against SAE J1979/J2012 and ISO 14229/15765 before release.
-- Vehicles (`sample-vehicles`): **sample_unverified** — approximate, not checked against manufacturer docs. Do not ship as "verified".
+## Verification levels (`data_sources.verification`)
+| level | meaning |
+|---|---|
+| `standard` | public standard identifier, not yet independently cross-checked |
+| `cross_checked` | confirmed against 2+ public secondary sources (URLs in `notes`); NOT OEM documentation |
+| `verified` | confirmed against OEM / official documentation (none yet) |
+| `sample_unverified` | illustrative only |
+
+## Data status (as of 2026-11-27)
+- **Vehicles (6 models, 9 engines):** `cross_checked` against Wikipedia, NHTSA TSBs, and parts/fitment catalogs. Each source's `notes` lists the cross-check URLs and discrepancies (e.g. Hyundai Elantra AD 1.6 engine code is market-dependent: G4FG vs G4FC; Toyota 2ZR-FXE displacement 1797 vs 1798 cc).
+- **PIDs:** 0x04,05,06,07,0B,0C,0D,0F,10,11,1F,42,46 formulas cross-checked; 0x2F and 0x5C not yet.
+- **DTC descriptions, UDS services/DIDs, CAN IDs:** project-written, not yet cross-checked. Verify against SAE J1979/J2012 and ISO 14229/15765 before release.
 - Update packages: sha256 integrity only; add signature verification before remote distribution (hook: `updater._verify_integrity`).
 - Python was chosen because the project stack was not known; schema.sql + JSON formats are language-neutral.

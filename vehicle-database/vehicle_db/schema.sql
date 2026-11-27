@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS data_sources (
   license TEXT NOT NULL,
   license_url TEXT,
   retrieved_at TEXT,
-  verification TEXT NOT NULL CHECK (verification IN ('standard','verified','sample_unverified')),
-  notes TEXT
+  verification TEXT NOT NULL CHECK (verification IN ('standard','cross_checked','verified','sample_unverified')),
+  notes TEXT   -- verification: standard=public standard identifier; cross_checked=>=2 public secondary sources; verified=OEM documentation; sample_unverified=illustrative only
 );
 
 CREATE TABLE IF NOT EXISTS manufacturers (

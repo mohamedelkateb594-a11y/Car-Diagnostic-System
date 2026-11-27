@@ -8,7 +8,7 @@ class ImportValidationError(ValueError):
 
 DTC_RE = re.compile(r"^[PBCU][0-3][0-9A-F]{3}$")
 HEX_RE = re.compile(r"^[0-9A-Fa-f]{1,8}$")
-VERIFY = {"standard", "verified", "sample_unverified"}
+VERIFY = {"standard", "cross_checked", "verified", "sample_unverified"}
 
 def validate_payload(p):
     """Return list of error strings (empty = valid)."""
@@ -19,6 +19,9 @@ def validate_payload(p):
         for f in ("name", "license"):
             if not s.get(f): e.append(f"source '{k}': missing {f}")
         if s.get("verification") not in VERIFY: e.append(f"source '{k}': invalid verification")
+        if s.get("verification") in ("cross_checked", "verified"):  # documented claims must be traceable
+            for f in ("url", "retrieved_at", "notes"):
+                if not s.get(f): e.append(f"source '{k}': {s.get('verification')} requires {f}")
     def src(rec, where):
         if rec.get("source") not in sources: e.append(f"{where}: unknown/missing source '{rec.get('source')}'")
     for m in p.get("manufacturers", []):
