@@ -1,0 +1,45 @@
+<UserControl x:Class="Diagnostic.Desktop.Views.ConnectionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:services="clr-namespace:Diagnostic.Desktop.Services">
+    <StackPanel>
+        <TextBlock Style="{StaticResource Text.Title}"
+                   Text="{Binding [NavConnection], Source={x:Static services:LocalizationService.Instance}}" />
+        <TextBlock Style="{StaticResource Text.Secondary}" Margin="0,8,0,0" TextWrapping="Wrap"
+                   Text="{Binding [ConnHint], Source={x:Static services:LocalizationService.Instance}}" />
+
+        <Border Style="{StaticResource Badge.Border}"
+                Visibility="{Binding Session.IsSimulated, Converter={StaticResource BoolToVis}}">
+            <TextBlock Foreground="{DynamicResource Brush.Accent.Text}"
+                       Text="{Binding [SimulatedBadge], Source={x:Static services:LocalizationService.Instance}}" />
+        </Border>
+
+        <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+            <Button Style="{StaticResource Button.Default}" Command="{Binding DiscoverCommand}"
+                    Content="{Binding [ConnDiscover], Source={x:Static services:LocalizationService.Instance}}" />
+            <Button Style="{StaticResource Button.Default}" Margin="8,0,0,0" Command="{Binding ConnectCommand}"
+                    Content="{Binding [ConnConnect], Source={x:Static services:LocalizationService.Instance}}" />
+            <Button Style="{StaticResource Button.Default}" Margin="8,0,0,0" Command="{Binding DisconnectCommand}"
+                    Content="{Binding [ConnDisconnect], Source={x:Static services:LocalizationService.Instance}}" />
+        </StackPanel>
+
+        <TextBlock Style="{StaticResource Text.Secondary}" Margin="0,16,0,4"
+                   Text="{Binding [ConnDevices], Source={x:Static services:LocalizationService.Instance}}" />
+        <ListBox ItemsSource="{Binding Devices}" SelectedItem="{Binding SelectedDevice, Mode=TwoWay}"
+                 DisplayMemberPath="DisplayName" Height="140"
+                 Background="{DynamicResource Brush.Surface}"
+                 Foreground="{DynamicResource Brush.Text.Primary}"
+                 BorderBrush="{DynamicResource Brush.Border}" />
+
+        <ProgressBar Height="4" Margin="0,12,0,0" IsIndeterminate="{Binding IsBusy}" />
+        <TextBlock Style="{StaticResource Text.Secondary}" Margin="0,8,0,0" TextWrapping="Wrap">
+            <TextBlock.Text>
+                <MultiBinding Converter="{StaticResource LocalizeConverter}">
+                    <Binding Path="StatusKey" />
+                    <Binding Path="Revision" Source="{x:Static services:LocalizationService.Instance}" />
+                </MultiBinding>
+            </TextBlock.Text>
+        </TextBlock>
+        <TextBlock Style="{StaticResource Text.Secondary}" TextWrapping="Wrap" Text="{Binding StatusDetail}" />
+    </StackPanel>
+</UserControl>

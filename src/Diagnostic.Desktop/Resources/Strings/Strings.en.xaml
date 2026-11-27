@@ -16,4 +16,67 @@
 
     <x:String x:Key="PlaceholderNotImplemented">This screen is not implemented yet.</x:String>
     <x:String x:Key="TaskLabel">Task</x:String>
+
+    <x:String x:Key="SimulatedBadge">SIMULATION — test data, not from a real vehicle</x:String>
+    <x:String x:Key="NotConnectedHint">Connect to a VCI device first from the VCI Connection screen.</x:String>
+
+    <x:String x:Key="ConnHint">Discover available VCI devices, select one, then connect. Discovery never connects automatically.</x:String>
+    <x:String x:Key="ConnDiscover">Discover devices</x:String>
+    <x:String x:Key="ConnConnect">Connect</x:String>
+    <x:String x:Key="ConnDisconnect">Disconnect</x:String>
+    <x:String x:Key="ConnDevices">Available devices</x:String>
+    <x:String x:Key="ConnNoDevices">No devices found.</x:String>
+    <x:String x:Key="ConnDevicesFound">Devices found. Select one and press Connect.</x:String>
+    <x:String x:Key="ConnConnected">Connected. Diagnostic session started.</x:String>
+    <x:String x:Key="ConnDisconnected">Disconnected.</x:String>
+
+    <x:String x:Key="VehRead">Read vehicle identity</x:String>
+    <x:String x:Key="VehVin">VIN</x:String>
+    <x:String x:Key="VehMake">Make</x:String>
+    <x:String x:Key="VehModel">Model</x:String>
+    <x:String x:Key="VehYear">Model year</x:String>
+    <x:String x:Key="VehEngine">Engine</x:String>
+    <x:String x:Key="VehMarket">Market</x:String>
+    <x:String x:Key="VinFormatOk">VIN format is valid (check digit not verified).</x:String>
+    <x:String x:Key="VinFormatInvalid">VIN format is not valid: it must be 17 characters and must not contain I, O or Q.</x:String>
+
+    <x:String x:Key="ScanRun">Run full scan</x:String>
+    <x:String x:Key="ScanEcu">ECU</x:String>
+    <x:String x:Key="ScanName">Name</x:String>
+    <x:String x:Key="ScanStatus">Status</x:String>
+    <x:String x:Key="ScanDtcCount">DTCs</x:String>
+    <x:String x:Key="ScanNotes">Notes</x:String>
+    <x:String x:Key="EcuStatus_Responded">Responded</x:String>
+    <x:String x:Key="EcuStatus_NoResponse">No response</x:String>
+    <x:String x:Key="EcuStatus_Unsupported">Not supported</x:String>
+    <x:String x:Key="EcuStatus_NotAttempted">Not attempted</x:String>
+    <x:String x:Key="EcuStatus_Error">Error</x:String>
+
+    <x:String x:Key="DtcRead">Read DTCs</x:String>
+    <x:String x:Key="DtcEcu">ECU</x:String>
+    <x:String x:Key="DtcCode">Code</x:String>
+    <x:String x:Key="DtcDescription">Description</x:String>
+    <x:String x:Key="DtcStatus">Status</x:String>
+    <x:String x:Key="DtcConfirmed">Confirmed</x:String>
+    <x:String x:Key="DtcPending">Pending</x:String>
+    <x:String x:Key="DtcNone">No fault codes reported by this ECU.</x:String>
+    <x:String x:Key="DtcRunScanFirst">Run a full scan first so the ECUs that respond can be listed.</x:String>
+
+    <x:String x:Key="LiveStart">Start</x:String>
+    <x:String x:Key="LiveStop">Stop</x:String>
+    <x:String x:Key="LiveEcu">ECU</x:String>
+    <x:String x:Key="LiveParams">Parameter ids (comma-separated, empty = service default)</x:String>
+
+    <x:String x:Key="OpStatus_Success">Completed successfully.</x:String>
+    <x:String x:Key="OpStatus_PartialSuccess">Completed partially.</x:String>
+    <x:String x:Key="OpStatus_Unsupported">Not supported.</x:String>
+    <x:String x:Key="OpStatus_NotApplicable">Not applicable.</x:String>
+    <x:String x:Key="OpStatus_NotConnected">Not connected.</x:String>
+    <x:String x:Key="OpStatus_Timeout">Timed out.</x:String>
+    <x:String x:Key="OpStatus_Cancelled">Cancelled.</x:String>
+    <x:String x:Key="OpStatus_InvalidResponse">Invalid response.</x:String>
+    <x:String x:Key="OpStatus_TransportError">Transport error.</x:String>
+    <x:String x:Key="OpStatus_ProtocolError">Protocol error.</x:String>
+    <x:String x:Key="OpStatus_SafetyPreconditionFailed">A safety precondition failed.</x:String>
+    <x:String x:Key="OpStatus_Failed">Failed.</x:String>
 </ResourceDictionary>
