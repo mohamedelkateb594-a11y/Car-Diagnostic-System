@@ -1,0 +1,25 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts", "src\Contracts\Contracts.csproj", "{8F1C2B64-3D1A-4E57-9C0B-1A7E5D2F4B31}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adapters.Abstractions", "src\Adapters.Abstractions\Adapters.Abstractions.csproj", "{C47A9E12-6B8D-4F03-A5E4-92D1B7C63E58}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8F1C2B64-3D1A-4E57-9C0B-1A7E5D2F4B31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F1C2B64-3D1A-4E57-9C0B-1A7E5D2F4B31}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F1C2B64-3D1A-4E57-9C0B-1A7E5D2F4B31}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F1C2B64-3D1A-4E57-9C0B-1A7E5D2F4B31}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C47A9E12-6B8D-4F03-A5E4-92D1B7C63E58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C47A9E12-6B8D-4F03-A5E4-92D1B7C63E58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C47A9E12-6B8D-4F03-A5E4-92D1B7C63E58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C47A9E12-6B8D-4F03-A5E4-92D1B7C63E58}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
