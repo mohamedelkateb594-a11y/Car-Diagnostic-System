@@ -14,6 +14,9 @@ public sealed class DiagnosticService : IDiagnosticService
     public const string Obd2EcuId = "obd2";
     private const byte LastSupportPid = 0x40;
 
+    // Temporary decision: only the first freeze frame is read.
+    private const byte FreezeFrameNumber = 0;
+
     private readonly VciConnectionManager _connection;
     private readonly TimeProvider _time;
     private readonly SemaphoreSlim _sessionGate = new(1, 1);
@@ -276,16 +279,93 @@ public sealed class DiagnosticService : IDiagnosticService
             firstFailure?.ErrorCode ?? "ParameterUnavailable");
     }
 
-    public Task<OperationResult<FreezeFrameRecord?>> ReadFreezeFrameAsync(
+    /// <summary>
+    /// Success with null Data means that no freeze frame is stored (for the requested code).
+    /// CapturedAtUtc is null because the ECU does not report a capture time.
+    /// </summary>
+    public async Task<OperationResult<FreezeFrameRecord?>> ReadFreezeFrameAsync(
         Guid sessionId, string ecuId, string? dtcCode, CancellationToken ct)
     {
         if (!TryGetSession<FreezeFrameRecord?>(sessionId, ct, out var session, out var failure))
         {
-            return Task.FromResult(failure);
+            return failure;
         }
 
-        return Task.FromResult(Result<FreezeFrameRecord?>(
-            session, OperationStatus.Unsupported, null, "Freeze frame reading is not implemented.", "NotImplemented"));
+        if (ecuId != Obd2EcuId)
+        {
+            return UnknownEcu<FreezeFrameRecord?>(session);
+        }
+
+        var trigger = await ExchangeAsync(
+            session,
+            Obd2FreezeFrame.Request(Obd2FreezeFrame.TriggerDtcPid, FreezeFrameNumber),
+            response => Obd2FreezeFrame.ParseTriggerDtc(response, FreezeFrameNumber),
+            ct);
+        if (trigger.Status != OperationStatus.Success || trigger.Data is null)
+        {
+            return Result<FreezeFrameRecord?>(session, trigger.Status, null, trigger.Message, trigger.ErrorCode);
+        }
+
+        if (trigger.Data.Length == 0)
+        {
+            return Result<FreezeFrameRecord?>(
+                session, OperationStatus.Success, null, "No freeze frame is stored.", null);
+        }
+
+        if (dtcCode is not null && !string.Equals(dtcCode, trigger.Data, StringComparison.OrdinalIgnoreCase))
+        {
+            return Result<FreezeFrameRecord?>(
+                session,
+                OperationStatus.Success,
+                null,
+                $"No freeze frame for {dtcCode}; the stored frame belongs to {trigger.Data}.",
+                null);
+        }
+
+        // Temporary decision: service 02 uses the same PIDs as service 01, so the service 01
+        // support list selects what to request. A rejected PID is omitted and reported.
+        var support = await GetSupportedPidsAsync(session, ct);
+        if (support.Data is null)
+        {
+            return Result<FreezeFrameRecord?>(session, support.Status, null, support.Message, support.ErrorCode);
+        }
+
+        var values = new List<LiveDataPoint>();
+        var omitted = new List<string>();
+        string? firstErrorCode = null;
+        foreach (var definition in Obd2PidCatalog.All.Where(d => support.Data.Contains(d.Pid)))
+        {
+            var value = await ExchangeAsync(
+                session,
+                Obd2FreezeFrame.Request(definition.Pid, FreezeFrameNumber),
+                response => Obd2FreezeFrame.ParseValue(response, FreezeFrameNumber, definition),
+                ct);
+            if (IsAbort(value.Status))
+            {
+                return Result<FreezeFrameRecord?>(session, value.Status, null, value.Message, value.ErrorCode);
+            }
+
+            if (value.Status != OperationStatus.Success)
+            {
+                firstErrorCode ??= value.ErrorCode;
+                omitted.Add($"{definition.ParameterId}: {value.Status} {value.Message}");
+                continue;
+            }
+
+            values.Add(new LiveDataPoint(
+                definition.ParameterId,
+                definition.Name,
+                value.Data,
+                definition.Unit,
+                _time.GetUtcNow(),
+                value.IsSimulated));
+        }
+
+        var snapshot = new FreezeFrameRecord(trigger.Data, values, null);
+        return omitted.Count == 0
+            ? Result<FreezeFrameRecord?>(session, OperationStatus.Success, snapshot, null, null)
+            : Result<FreezeFrameRecord?>(
+                session, OperationStatus.PartialSuccess, snapshot, string.Join("; ", omitted), firstErrorCode);
     }
 
     private static bool IsAbort(OperationStatus status) =>
