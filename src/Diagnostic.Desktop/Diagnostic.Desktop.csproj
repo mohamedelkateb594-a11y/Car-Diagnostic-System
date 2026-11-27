@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!-- PROVISIONAL: pending FND-001 approval. .NET 10 is LTS (support until 2028-11-14); .NET 8/9 reached end of support on 2026-11-10. -->
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Diagnostic.Desktop</RootNamespace>
+    <AssemblyName>Diagnostic.Desktop</AssemblyName>
+  </PropertyGroup>
+
+</Project>
