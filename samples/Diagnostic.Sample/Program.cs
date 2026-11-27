@@ -38,7 +38,7 @@ foreach (var adapter in discovery.Data)
 
     foreach (var ecu in scan.Data)
     {
-        Console.WriteLine($"ECU {ecu.EcuName}: {ecu.Status} {ecu.Notes}");
+        Console.WriteLine($"ECU {ecu.DisplayName}: {ecu.Status} {ecu.Notes}");
         foreach (var dtc in ecu.Dtcs)
         {
             Console.WriteLine($"  {dtc.Code} ({dtc.Status})");
