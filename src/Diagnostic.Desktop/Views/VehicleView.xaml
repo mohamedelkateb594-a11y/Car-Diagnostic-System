@@ -12,8 +12,8 @@
                        Text="{Binding [SimulatedBadge], Source={x:Static services:LocalizationService.Instance}}" />
         </Border>
 
-        <TextBlock Style="{StaticResource Text.Secondary}" Margin="0,12,0,0" TextWrapping="Wrap"
-                   Visibility="{Binding Session.IsActive, Converter={StaticResource BoolToVis}, ConverterParameter=x}">
+        <TextBlock Margin="0,12,0,0" TextWrapping="Wrap"
+                   Text="{Binding [NotConnectedHint], Source={x:Static services:LocalizationService.Instance}}">
             <TextBlock.Style>
                 <Style TargetType="TextBlock" BasedOn="{StaticResource Text.Secondary}">
                     <Setter Property="Visibility" Value="Collapsed" />
@@ -24,9 +24,6 @@
                     </Style.Triggers>
                 </Style>
             </TextBlock.Style>
-            <TextBlock.Text>
-                <Binding Path="Revision" Source="{x:Static services:LocalizationService.Instance}" ConverterParameter="NotConnectedHint" />
-            </TextBlock.Text>
         </TextBlock>
 
         <Button Style="{StaticResource Button.Default}" HorizontalAlignment="Left" Margin="0,16,0,0"

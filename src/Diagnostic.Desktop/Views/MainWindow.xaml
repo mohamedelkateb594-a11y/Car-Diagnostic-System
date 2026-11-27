@@ -13,6 +13,21 @@
         <DataTemplate DataType="{x:Type vm:PlaceholderViewModel}">
             <views:PlaceholderView />
         </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ConnectionViewModel}">
+            <views:ConnectionView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:VehicleViewModel}">
+            <views:VehicleView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:ScanViewModel}">
+            <views:ScanView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:DtcViewModel}">
+            <views:DtcView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type vm:LiveDataViewModel}">
+            <views:LiveDataView />
+        </DataTemplate>
     </Window.Resources>
 
     <Grid>

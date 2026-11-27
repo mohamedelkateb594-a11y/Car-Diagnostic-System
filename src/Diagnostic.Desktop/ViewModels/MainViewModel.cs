@@ -10,16 +10,23 @@ public sealed class MainViewModel : ViewModelBase
 {
     private readonly ThemeService _themeService;
     private readonly LocalizationService _localization;
+    private readonly IReadOnlyDictionary<string, Func<ViewModelBase>> _screens;
     private NavigationItem? _selectedItem;
 
+    /// <param name="screens">
+    /// Real screens by navigation key. Keys without an entry fall back to a placeholder,
+    /// so screens can be wired one by one as their services become available.
+    /// </param>
     public MainViewModel(
         INavigationService navigation,
         ThemeService themeService,
-        LocalizationService localization)
+        LocalizationService localization,
+        IReadOnlyDictionary<string, Func<ViewModelBase>>? screens = null)
     {
         Navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
         _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         _localization = localization ?? throw new ArgumentNullException(nameof(localization));
+        _screens = screens ?? new Dictionary<string, Func<ViewModelBase>>();
 
         RegisterScreens();
 
@@ -51,7 +58,7 @@ public sealed class MainViewModel : ViewModelBase
         }
     }
 
-    // Task ids follow TASKS.md (null where TASKS.md has no id). Real screens replace these placeholders later.
+    // Task ids follow TASKS.md (null where TASKS.md has no id). Keys without a real screen show a placeholder.
     private void RegisterScreens()
     {
         Register("dashboard", "NavDashboard", null);
@@ -65,7 +72,12 @@ public sealed class MainViewModel : ViewModelBase
     }
 
     private void Register(string key, string titleKey, string? taskReference)
-        => Navigation.Register(new NavigationItem(key, titleKey, () => new PlaceholderViewModel(titleKey, taskReference)));
+    {
+        Func<ViewModelBase> factory = _screens.TryGetValue(key, out var screen)
+            ? screen
+            : () => new PlaceholderViewModel(titleKey, taskReference);
+        Navigation.Register(new NavigationItem(key, titleKey, factory));
+    }
 
     private void OnNavigationChanged(object? sender, PropertyChangedEventArgs e)
     {
