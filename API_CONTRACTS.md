@@ -85,6 +85,10 @@ Rules:
 - Phase 1 payload level: `request` is a diagnostic service payload (service identifier and parameters) and `Data` is the service response payload. Neither contains CAN headers or ISO-TP control bytes; transport framing is the adapter's job.
 - Phase 1 addresses a single simulated ECU. ECU addressing, multiple responses and frame-level transport require a separate contract change.
 - Until `AdapterInfo` can express simulation, a simulated adapter includes `SIMULATED` in `DisplayName`.
+- The `SendAsync` status reflects only the connection, the transport and the reception of data. A negative ECU response that was received intact is `Success`, with the original bytes in `Data`. Transport success does not mean the diagnostic request succeeded.
+- The protocol layer interprets the ECU response. A rejected request is never reported as a successful diagnostic operation; it is reported as `Unsupported`, `NotApplicable` or `Failed` according to the meaning of the response.
+- The original response is preserved for diagnosis and logging: the diagnostic result sets `ErrorCode` to `NegativeResponse`, `Message` contains the original bytes in hexadecimal, and the bytes are logged without personal data.
+- Until a response code has a meaning taken from a license-verified source, its status is `Failed`.
 
 ## 4. Diagnostic service
 ```csharp
@@ -215,3 +219,6 @@ A report should include:
 - Developer A delivers tasks A-101 to A-105.
 - CAN, ISO-TP, UDS and freeze frame are deferred to later tasks.
 - Until freeze frame is implemented, `ReadFreezeFrameAsync` returns `Unsupported`.
+- Service identifiers, PIDs, decoding formulas and response-code meanings come only from sources whose terms of use have been verified. Record the source and license of each item.
+- Do not use SAE J1979, or any data with unclear rights or license, without verifying its terms of use.
+- Items without a verified source are clearly marked unavailable and are never invented.
