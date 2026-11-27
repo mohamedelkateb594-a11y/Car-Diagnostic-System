@@ -62,7 +62,7 @@ Adapters.Mock           Hardware Adapter(s)
 - No hard-coded unsupported vehicle-specific commands.
 
 ### `src/Adapters.Abstractions`
-- VCI connection and transport abstractions.
+- VCI connection and transport abstractions, including `IVciAdapter`.
 - Device capabilities and connection lifecycle.
 - No specific vendor SDK dependency.
 
@@ -91,7 +91,7 @@ Adapters.Mock           Hardware Adapter(s)
 
 ## 4. Dependency direction
 - Desktop depends on Contracts and Core.
-- Core depends on Contracts and abstractions.
+- Core depends on Contracts, adapter abstractions and Diagnostic.Protocols.
 - Protocols depend on Contracts/adapter abstractions as required.
 - Hardware adapters implement adapter abstractions.
 - Mock adapter implements the same abstractions.

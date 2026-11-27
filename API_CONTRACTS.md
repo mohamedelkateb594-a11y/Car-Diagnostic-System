@@ -3,7 +3,7 @@
 > هذه الوثيقة هي اتفاق التكامل بين المطورين. لا تغيّر أي contract دون PR وموافقة بقية الفريق.
 
 ## 1. General conventions
-- C# interfaces and DTOs live in `src/Contracts`.
+- C# interfaces and DTOs live in `src/Contracts`, except the VCI abstraction `IVciAdapter`, which lives in `src/Adapters.Abstractions` and depends on `Contracts`.
 - Async I/O methods return `Task<T>` and accept `CancellationToken`.
 - Use nullable reference types.
 - Use `DateTimeOffset` in UTC for timestamps.
@@ -11,6 +11,9 @@
 - Never represent missing/unsupported values as zero.
 - Simulated results must carry `IsSimulated = true`.
 - All operations return structured results; do not use exceptions for expected outcomes such as timeout or unsupported service.
+- Consumers check `Status` before reading `Data`. For value types (for example `OperationResult<bool>`), `Data` holds the type default on failure and carries no meaning.
+- `PartialSuccess` means `Data` is present but some requested items are missing.
+- `PermissionDenied` and `UnknownError` (ARCHITECTURE.md error model) are reported as `Status = Failed` with `ErrorCode` set to that name.
 
 ## 2. Shared result types
 Suggested initial contracts (names may be refined by an approved PR):
@@ -79,6 +82,13 @@ Rules:
 - Hardware implementation must document driver/SDK/license requirements.
 - Adapter discovery must not connect automatically without user intent.
 - Disconnection and cancellation must release resources safely.
+- Phase 1 payload level: `request` is a diagnostic service payload (service identifier and parameters) and `Data` is the service response payload. Neither contains CAN headers or ISO-TP control bytes; transport framing is the adapter's job.
+- Phase 1 addresses a single simulated ECU. ECU addressing, multiple responses and frame-level transport require a separate contract change.
+- Until `AdapterInfo` can express simulation, a simulated adapter includes `SIMULATED` in `DisplayName`.
+- The `SendAsync` status reflects only the connection, the transport and the reception of data. A negative ECU response that was received intact is `Success`, with the original bytes in `Data`. Transport success does not mean the diagnostic request succeeded.
+- The protocol layer interprets the ECU response. A rejected request is never reported as a successful diagnostic operation; it is reported as `Unsupported`, `NotApplicable` or `Failed` according to the meaning of the response.
+- The original response is preserved for diagnosis and logging: the diagnostic result sets `ErrorCode` to `NegativeResponse`, `Message` contains the original bytes in hexadecimal, and the bytes are logged without personal data.
+- Until a response code has a meaning taken from a license-verified source, its status is `Failed`.
 
 ## 4. Diagnostic service
 ```csharp
@@ -142,6 +152,12 @@ public sealed record FreezeFrameRecord(
     DateTimeOffset? CapturedAtUtc);
 ```
 
+Rules:
+- A requested live-data parameter that is unavailable is omitted (never zero) and the result is `PartialSuccess`.
+- In freeze-frame values, `TimestampUtc` is the time the value was read.
+- `Success` with null `Data` from `ReadFreezeFrameAsync` means no freeze frame is stored.
+- A failed DTC read for an ECU is reported as `EcuScanStatus.Error` with `Notes`. `Responded` with an empty `Dtcs` list means the ECU reported no codes.
+
 ## 6. Vehicle definition repository
 ```csharp
 public interface IVehicleDefinitionRepository
@@ -179,7 +195,7 @@ public enum SupportLevel { Supported, Unsupported, Unknown, NotTested }
 ```
 
 ## 8. Safety boundary
-The first release supports read-oriented operations only. Clear DTC is a state-changing operation and requires an explicit confirmation flow in UI and a Core-side guard. Active tests, coding, adaptation, security access and ECU programming are not part of the initial contract. They require a separate reviewed contract and safety design.
+The first release supports read-oriented operations only. The initial contract has no Clear DTC operation. Clear DTC is state-changing; adding it requires a separate reviewed contract with an explicit confirmation flow in UI and a Core-side guard. Active tests, coding, adaptation, security access and ECU programming are not part of the initial contract. They require a separate reviewed contract and safety design.
 
 ## 9. Reporting contract
 A report should include:
@@ -198,3 +214,11 @@ A report should include:
 3. Propose DTO/interface changes and migration.
 4. Get approval from A, B and C (or project owner).
 5. Update tests and all affected implementations in coordinated PRs.
+
+## 11. Phase 1 scope
+- Developer A delivers tasks A-101 to A-105.
+- CAN, ISO-TP, UDS and freeze frame are deferred to later tasks.
+- Until freeze frame is implemented, `ReadFreezeFrameAsync` returns `Unsupported`.
+- Service identifiers, PIDs, decoding formulas and response-code meanings come only from sources whose terms of use have been verified. Record the source and license of each item.
+- Do not use SAE J1979, or any data with unclear rights or license, without verifying its terms of use.
+- Items without a verified source are clearly marked unavailable and are never invented.
