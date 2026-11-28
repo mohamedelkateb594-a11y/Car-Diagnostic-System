@@ -1,0 +1,21 @@
+name: desktop-ci
+
+on:
+  push:
+    branches: [dev-c/desktop-ui, main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet build tests/Desktop.Tests/Desktop.Tests.csproj --configuration Release
+      - run: dotnet test tests/Desktop.Tests/Desktop.Tests.csproj --configuration Release --no-build --logger "console;verbosity=normal"
