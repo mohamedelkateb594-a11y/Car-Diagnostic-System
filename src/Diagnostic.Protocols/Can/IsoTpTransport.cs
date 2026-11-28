@@ -71,6 +71,9 @@ public sealed class IsoTpTransport
             await _gate.WaitAsync(linked.Token);
             try
             {
+                // A late reply to an earlier request must not be read as the answer to this one.
+                await _channel.DiscardReceivedAsync(linked.Token).WaitAsync(linked.Token);
+
                 var failure = await SendMessageAsync(request, linked.Token);
                 if (failure is not null)
                 {

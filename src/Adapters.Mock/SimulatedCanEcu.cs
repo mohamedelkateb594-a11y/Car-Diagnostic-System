@@ -45,6 +45,20 @@ public sealed class SimulatedCanEcu : ICanChannel
 
     public async Task<CanFrame> ReceiveAsync(CancellationToken ct) => await _outgoing.Reader.ReadAsync(ct);
 
+    public Task DiscardReceivedAsync(CancellationToken ct)
+    {
+        if (ct.IsCancellationRequested)
+        {
+            return Task.FromCanceled(ct);
+        }
+
+        while (_outgoing.Reader.TryRead(out _))
+        {
+        }
+
+        return Task.CompletedTask;
+    }
+
     private void Handle(byte[] data)
     {
         switch (data[0] >> 4)

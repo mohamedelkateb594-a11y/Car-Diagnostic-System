@@ -95,5 +95,8 @@ public class IsoTpPendingResponseTests
         }
 
         public async Task<CanFrame> ReceiveAsync(CancellationToken ct) => await _incoming.Reader.ReadAsync(ct);
+
+        // Nothing is queued before a request is sent.
+        public Task DiscardReceivedAsync(CancellationToken ct) => Task.CompletedTask;
     }
 }

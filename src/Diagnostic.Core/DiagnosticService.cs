@@ -17,6 +17,11 @@ public sealed class DiagnosticService : IDiagnosticService
     // Temporary decision: only the first freeze frame is read.
     private const byte FreezeFrameNumber = 0;
 
+    // Temporary decision: after this many unanswered requests in a row, one multi-value read stops
+    // asking, so that a silent ECU does not cost one timeout per parameter.
+    private const int MaxUnansweredRequests = 3;
+    private const string NotRead = "not read after repeated communication failures";
+
     private readonly VciConnectionManager _connection;
     private readonly TimeProvider _time;
     private readonly SemaphoreSlim _sessionGate = new(1, 1);
@@ -241,6 +246,7 @@ public sealed class DiagnosticService : IDiagnosticService
         var points = new List<LiveDataPoint>();
         var omitted = new List<string>();
         OperationResult<double>? firstFailure = null;
+        var unanswered = 0;
         foreach (var parameterId in parameterIds.Distinct(StringComparer.OrdinalIgnoreCase))
         {
             if (!Obd2PidCatalog.TryGet(parameterId, out var definition))
@@ -255,6 +261,12 @@ public sealed class DiagnosticService : IDiagnosticService
                 continue;
             }
 
+            if (unanswered >= MaxUnansweredRequests)
+            {
+                omitted.Add($"{parameterId}: {NotRead}");
+                continue;
+            }
+
             var value = await ExchangeAsync(
                 session,
                 Obd2Request.CurrentData(definition.Pid),
@@ -266,6 +278,7 @@ public sealed class DiagnosticService : IDiagnosticService
                     session, value.Status, null, value.Message, value.ErrorCode);
             }
 
+            unanswered = IsUnanswered(value.Status) ? unanswered + 1 : 0;
             if (value.Status != OperationStatus.Success)
             {
                 firstFailure ??= value;
@@ -352,8 +365,15 @@ public sealed class DiagnosticService : IDiagnosticService
         var values = new List<LiveDataPoint>();
         var omitted = new List<string>();
         string? firstErrorCode = null;
+        var unanswered = 0;
         foreach (var definition in Obd2PidCatalog.All.Where(d => support.Data.Contains(d.Pid)))
         {
+            if (unanswered >= MaxUnansweredRequests)
+            {
+                omitted.Add($"{definition.ParameterId}: {NotRead}");
+                continue;
+            }
+
             var value = await ExchangeAsync(
                 session,
                 Obd2FreezeFrame.Request(definition.Pid, FreezeFrameNumber),
@@ -364,6 +384,7 @@ public sealed class DiagnosticService : IDiagnosticService
                 return Result<FreezeFrameRecord?>(session, value.Status, null, value.Message, value.ErrorCode);
             }
 
+            unanswered = IsUnanswered(value.Status) ? unanswered + 1 : 0;
             if (value.Status != OperationStatus.Success)
             {
                 firstErrorCode ??= value.ErrorCode;
@@ -389,6 +410,9 @@ public sealed class DiagnosticService : IDiagnosticService
 
     private static bool IsAbort(OperationStatus status) =>
         status is OperationStatus.Cancelled or OperationStatus.NotConnected;
+
+    private static bool IsUnanswered(OperationStatus status) =>
+        status is OperationStatus.Timeout or OperationStatus.TransportError;
 
     private static OperationResult<T> Result<T>(
         Session session, OperationStatus status, T? data, string? message, string? errorCode, TimeProvider time) =>
