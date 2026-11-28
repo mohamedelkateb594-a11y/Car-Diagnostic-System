@@ -30,21 +30,24 @@ IDiagnosticService diagnostics = mock;
 - Freeze frame: `Success` with `Data = null` means no stored frame. To simulate one, set `mock.Adapter.ResponseOverride = SimulatedFreezeFrame.Sample.Respond`.
 - Clear DTC is not implemented and is not in the contract.
 
-## Supported
+## Coverage
 
-| Function | Notes |
-| --- | --- |
-| Discovery, connect, disconnect | One connection and one session at a time |
-| VIN (service 09 PID 02) | |
-| Stored and pending DTCs (services 03, 07) | No descriptions |
-| Live data (service 01) | PIDs listed in `Obd2PidCatalog`, only when the ECU reports support |
-| Freeze frame (service 02) | Frame 0 only, same PID catalog |
-| UDS 0x22 and 0x19/02 | Through `UdsReader`; not part of `IDiagnosticService` |
-| CAN / ISO-TP | `IsoTpVciAdapter` over `ICanChannel`; tested with simulated channels only |
+"Simulated" means tested with synthetic data only. Nothing is verified on real hardware.
+
+| Function | Level | Notes |
+| --- | --- | --- |
+| Discovery, connect, disconnect | Simulated | One connection and one session at a time |
+| VIN (service 09 PID 02) | Simulated | |
+| Stored and pending DTCs (services 03, 07) | Simulated | No descriptions |
+| Live data (service 01) | Simulated | PIDs listed in `Obd2PidCatalog`, only when the ECU reports support |
+| Freeze frame (service 02) | Simulated | Frame 0 only, same PID catalog |
+| UDS 0x22 and 0x19/02 | Simulated | Through `UdsReader`; not part of `IDiagnosticService` |
+| CAN / ISO-TP | Simulated | `IsoTpVciAdapter` over `ICanChannel` |
+| Response pending (0x78) | Simulated | CAN / ISO-TP path only; the final response must arrive within `DiagnosticOptions.RequestTimeout` |
 
 ## Not supported
 
-Real VCI hardware, ECU discovery and addressing, non-CAN protocols' multi-message responses, permanent DTCs, monitor status, waiting on UDS response pending (0x78), UDS sessions and security access, Clear DTC, active tests, coding, programming.
+Real VCI hardware, ECU discovery and addressing, non-CAN protocols' multi-message responses, permanent DTCs, monitor status, extending the timeout after response pending, UDS sessions and security access, Clear DTC, active tests, coding, programming.
 
 ## Temporary decisions (pending contract approval, PR #1)
 
