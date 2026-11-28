@@ -1,0 +1,44 @@
+<Application x:Class="Diagnostic.Desktop.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:conv="clr-namespace:Diagnostic.Desktop.Converters">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Theme/Styles.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+            <conv:LocalizeConverter x:Key="LocalizeConverter" />
+            <BooleanToVisibilityConverter x:Key="BoolToVis" />
+
+            <Style x:Key="Badge.Border" TargetType="Border">
+                <Setter Property="Background" Value="{DynamicResource Brush.Accent}" />
+                <Setter Property="CornerRadius" Value="4" />
+                <Setter Property="Padding" Value="8,3" />
+                <Setter Property="HorizontalAlignment" Value="Left" />
+                <Setter Property="Margin" Value="0,12,0,0" />
+            </Style>
+
+            <Style x:Key="Data.Grid" TargetType="DataGrid">
+                <Setter Property="AutoGenerateColumns" Value="False" />
+                <Setter Property="IsReadOnly" Value="True" />
+                <Setter Property="CanUserAddRows" Value="False" />
+                <Setter Property="HeadersVisibility" Value="Column" />
+                <Setter Property="GridLinesVisibility" Value="Horizontal" />
+                <Setter Property="Background" Value="{DynamicResource Brush.Surface}" />
+                <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+                <Setter Property="RowBackground" Value="{DynamicResource Brush.Surface}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource Brush.Border}" />
+                <Setter Property="HorizontalGridLinesBrush" Value="{DynamicResource Brush.Border}" />
+                <Setter Property="ColumnHeaderStyle">
+                    <Setter.Value>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="{DynamicResource Brush.Nav.Background}" />
+                            <Setter Property="Foreground" Value="{DynamicResource Brush.Text.Primary}" />
+                            <Setter Property="Padding" Value="8,6" />
+                        </Style>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

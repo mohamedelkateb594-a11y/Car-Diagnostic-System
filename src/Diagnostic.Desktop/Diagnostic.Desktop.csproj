@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <!-- .NET 10 LTS approved by the project owner (support until 2028-11-14). -->
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Diagnostic.Desktop</RootNamespace>
+    <AssemblyName>Diagnostic.Desktop</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Desktop.Tests" />
+  </ItemGroup>
+
+  <!-- Versions 10.0.0 verified on nuget.org (Debug/Logging/DependencyInjection). -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\Adapters.Abstractions\Adapters.Abstractions.csproj" />
+    <ProjectReference Include="..\Diagnostic.Presentation\Diagnostic.Presentation.csproj" />
+    <!-- Referenced only by Composition/SimulatedBackend.cs, the single place that knows the engine. -->
+    <ProjectReference Include="..\Adapters.Mock\Adapters.Mock.csproj" />
+  </ItemGroup>
+
+</Project>
