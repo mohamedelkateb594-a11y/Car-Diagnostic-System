@@ -1,6 +1,6 @@
 def _esc(s): return str(s).strip().replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
-def search_vehicles(conn, make=None, model=None, engine=None, year=None, limit=50, variant_id=None):
+def search_vehicles(conn, make=None, model=None, engine=None, year=None, limit=50, variant_id=None, confirmed_only=False):
     """All filters optional; case-insensitive substring match. `year` must fall inside [year_from, year_to or open-ended]."""
     sql = """SELECT v.id AS variant_id, mf.name AS make, mo.name AS model, mo.generation, v.year_from, v.year_to,
                     v.engine_code, v.engine_desc, v.displacement_cc, v.fuel, v.market,
@@ -8,6 +8,7 @@ def search_vehicles(conn, make=None, model=None, engine=None, year=None, limit=5
              FROM vehicle_variants v JOIN vehicle_models mo ON mo.id=v.model_id
              JOIN manufacturers mf ON mf.id=mo.manufacturer_id JOIN data_sources s ON s.id=v.source_id WHERE 1=1"""
     a = []
+    if confirmed_only: sql += " AND s.verification IN ('cross_checked','verified')"
     if variant_id is not None: sql += " AND v.id = ?"; a.append(variant_id)
     for col, val in (("mf.name", make), ("mo.name", model)):
         if val: sql += f" AND {col} LIKE ? ESCAPE '\\'"; a.append(f"%{_esc(val)}%")
@@ -36,3 +37,11 @@ def lookup_dtc(conn, code):
     r = conn.execute("""SELECT d.code, d.description, d.is_generic, s.key AS source_key, s.license
                         FROM dtc_definitions d JOIN data_sources s ON s.id=d.source_id WHERE d.code=? COLLATE NOCASE""", (code.strip(),)).fetchone()
     return dict(r) if r else None
+
+def list_dtcs(conn, confirmed_only=False, generic_only=False):
+    """DTC catalogue with provenance. confirmed_only keeps cross_checked/verified sources; generic_only drops OEM-specific codes."""
+    sql = """SELECT d.code, d.description, d.is_generic, s.key AS source_key, s.url AS source_url, s.verification, s.retrieved_at
+             FROM dtc_definitions d JOIN data_sources s ON s.id=d.source_id WHERE 1=1"""
+    if confirmed_only: sql += " AND s.verification IN ('cross_checked','verified')"
+    if generic_only: sql += " AND d.is_generic=1"
+    return [dict(r) for r in conn.execute(sql + " ORDER BY d.code")]

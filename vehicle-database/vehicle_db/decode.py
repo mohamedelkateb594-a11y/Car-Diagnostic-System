@@ -18,3 +18,18 @@ def decode_pid(row, data):
     if len(data) < row["num_bytes"]:
         raise ValueError("response shorter than PID definition")
     return safe_eval(row["formula"], {n: data[i] for i, n in enumerate("ABCD"[:row["num_bytes"]])})
+
+def pid_support_location(pid):
+    """Where a Mode 01 PID's support flag lives: (bitmap_pid, bit). bit 31 = first PID after the bitmap PID, 0 = base+32.
+    PID 0x00 is the root of the chain and has no location (ValueError)."""
+    if not isinstance(pid, int) or not 1 <= pid <= 255:
+        raise ValueError("pid must be 1..255")
+    base = ((pid - 1) // 32) * 32
+    return base, 32 - (pid - base)
+
+def decode_supported_pids(bitmap_pid, data):
+    """data = 4 response bytes of PID 0x00/0x20/0x40/...; returns the sorted list of PIDs flagged as supported."""
+    if len(data) < 4: raise ValueError("support bitmap needs 4 bytes")
+    if bitmap_pid % 32 != 0: raise ValueError("bitmap_pid must be a multiple of 32")
+    value = int.from_bytes(bytes(data[:4]), "big")
+    return [bitmap_pid + k for k in range(1, 33) if value & (1 << (32 - k))]

@@ -17,7 +17,10 @@ def init_db(conn):
     return conn
 
 def load_seed(conn):
-    """Load bundled seed data (idempotent). Returns import stats."""
+    """Load every bundled seed file in seed/*.json (sorted, idempotent). Returns summed import stats."""
     from .importer import import_payload
-    seed = Path(__file__).parent / "seed" / "seed_data.json"
-    return import_payload(conn, json.loads(seed.read_text(encoding="utf-8")))
+    total = {}
+    for f in sorted((Path(__file__).parent / "seed").glob("*.json")):
+        for k, v in import_payload(conn, json.loads(f.read_text(encoding="utf-8"))).items():
+            total[k] = total.get(k, 0) + v
+    return total
