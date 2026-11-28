@@ -10,6 +10,8 @@
     <ProjectReference Include="..\Contracts\Contracts.csproj" />
     <ProjectReference Include="..\Adapters.Abstractions\Adapters.Abstractions.csproj" />
     <ProjectReference Include="..\Diagnostic.Core\Diagnostic.Core.csproj" />
+    <ProjectReference Include="..\Diagnostic.Protocols\Diagnostic.Protocols.csproj" />
+    <ProjectReference Include="..\Adapters.IsoTp\Adapters.IsoTp.csproj" />
   </ItemGroup>
 
 </Project>
