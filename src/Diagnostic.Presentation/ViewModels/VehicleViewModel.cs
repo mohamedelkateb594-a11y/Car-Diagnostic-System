@@ -42,9 +42,19 @@ public sealed class VehicleViewModel : OperationScreenViewModel
 
     public string MarketText => Display(Session.Vehicle?.Market);
 
-    public string? VinStatusKey => Session.Vehicle?.Vin is null
-        ? null
-        : VinValidator.IsWellFormed(Session.Vehicle.Vin) ? "VinFormatOk" : "VinFormatInvalid";
+    public string? VinStatusKey
+    {
+        get
+        {
+            var vin = Session.Vehicle?.Vin;
+            if (vin is null)
+            {
+                return null;
+            }
+
+            return VinValidator.IsWellFormed(vin) ? "VinFormatOk" : "VinFormatInvalid";
+        }
+    }
 
     private static string Display(string? value) => string.IsNullOrWhiteSpace(value) ? Missing : value;
 
