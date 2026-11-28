@@ -125,7 +125,7 @@ public class DiagnosticServiceTests
 
         var partial = await service.ReadLiveDataAsync(id, Ecu, ["obd2.01.0C", "nope", "obd2.01.5C"], None);
         var none = await service.ReadLiveDataAsync(id, Ecu, ["obd2.01.5C"], None);
-        var empty = await service.ReadLiveDataAsync(id, Ecu, [], None);
+        var missing = await service.ReadLiveDataAsync(id, Ecu, null!, None);
 
         Assert.Equal(OperationStatus.PartialSuccess, partial.Status);
         Assert.NotNull(partial.Data);
@@ -134,7 +134,7 @@ public class DiagnosticServiceTests
         Assert.Equal(OperationStatus.Unsupported, none.Status);
         Assert.NotNull(none.Data);
         Assert.Empty(none.Data);
-        Assert.Equal("InvalidArgument", empty.ErrorCode);
+        Assert.Equal("InvalidArgument", missing.ErrorCode);
     }
 
     [Fact]

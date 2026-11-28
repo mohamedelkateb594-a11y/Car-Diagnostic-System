@@ -13,19 +13,20 @@ dotnet run --project samples/Diagnostic.Sample -c Release
 ## Using it from the UI (answers issue #3)
 
 - Mock services live in `src/Adapters.Mock`: `MockVciAdapter` and `MockDiagnosticService`.
-- The composition root references `Adapters.Mock` and registers:
+- The composition root references `Adapters.Mock`. A consumer of the shared interfaces needs only these two objects:
 
 ```csharp
 var mock = new MockDiagnosticService();
-services.AddSingleton<IDiagnosticService>(mock);
-services.AddSingleton(mock.Connection); // VciConnectionManager
+IVciAdapter adapter = mock.ManagedAdapter; // not mock.Adapter
+IDiagnosticService diagnostics = mock;
 ```
 
-- View models need only `Contracts` and `Diagnostic.Core`.
-- Discovery: `VciConnectionManager.DiscoverAsync` (wraps `IVciAdapter.DiscoverAsync`). `Success` with an empty list means no device; any other status is a discovery failure.
-- Connect: `ConnectAsync(adapterId)`, then `StartSessionAsync` with the same id reuses the connection. `EndSessionAsync` or `DisconnectAsync` closes it.
+- Always pass `ManagedAdapter` (`ManagedVciAdapter`) as the `IVciAdapter`. It shares one connection with the service. Connecting the raw `mock.Adapter` first makes `StartSessionAsync` fail with `AdapterBusy`.
+- Flow: `DiscoverAsync`, `ConnectAsync(adapterId)`, `StartSessionAsync` with the same id, then reads. `DisconnectAsync` ends the session's connection; after reconnecting, start a new session.
+- `ManagedVciAdapter.SendAsync` is refused (`RawAccessNotAllowed`). A failed discovery throws instead of returning an empty list.
+- Live data: an empty parameter list reads every supported parameter.
 - Every simulated result has `IsSimulated = true`, and simulated adapters say `SIMULATED` in `DisplayName`.
-- Check `Status` before `Data`. `PartialSuccess` means `Data` is present but incomplete; see `Message`.
+- Check `Status` before `Data`. `PartialSuccess` means `Data` is present but incomplete; see `Message`. Do not show it as a full success: an empty DTC list with `PartialSuccess` does not mean that there are no codes.
 - Freeze frame: `Success` with `Data = null` means no stored frame. To simulate one, set `mock.Adapter.ResponseOverride = SimulatedFreezeFrame.Sample.Respond`.
 - Clear DTC is not implemented and is not in the contract.
 
@@ -49,6 +50,7 @@ Real VCI hardware, ECU discovery and addressing, non-CAN protocols' multi-messag
 
 - A negative ECU response is never a success: `ErrorCode = NegativeResponse`, `Message` holds the raw bytes.
 - The generic ECU id is `obd2`.
-- `VciConnectionManager`, `EndSessionAsync`, `GetSupportedParametersAsync`, `UdsReader` and `ICanChannel` are additions outside the shared contracts.
+- An empty live-data parameter list means all supported parameters.
+- `VciConnectionManager`, `ManagedVciAdapter`, `EndSessionAsync`, `GetSupportedParametersAsync`, `UdsReader` and `ICanChannel` are additions outside the shared contracts.
 
 Definition sources and licences: [`../Diagnostic.Protocols/SOURCES.md`](../Diagnostic.Protocols/SOURCES.md).
