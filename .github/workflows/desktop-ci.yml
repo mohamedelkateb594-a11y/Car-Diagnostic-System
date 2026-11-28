@@ -1,0 +1,23 @@
+name: Desktop CI
+on:
+  push:
+    branches: ["dev-c/**"]
+  pull_request:
+    paths:
+      - "src/Diagnostic.Desktop/**"
+      - "src/Diagnostic.Presentation/**"
+      - "tests/Desktop.Tests/**"
+      - ".github/workflows/desktop-ci.yml"
+permissions:
+  contents: read
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+      - run: dotnet build src/Diagnostic.Desktop/Diagnostic.Desktop.csproj --configuration Release -warnaserror
+      - run: dotnet build tests/Desktop.Tests/Desktop.Tests.csproj --configuration Release
+      - run: dotnet test tests/Desktop.Tests/Desktop.Tests.csproj --configuration Release --no-build
