@@ -1,0 +1,81 @@
+<Window x:Class="Diagnostic.Desktop.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:pvm="clr-namespace:Diagnostic.Presentation.ViewModels;assembly=Diagnostic.Presentation"
+        xmlns:views="clr-namespace:Diagnostic.Desktop.Views"
+        xmlns:services="clr-namespace:Diagnostic.Desktop.Services"
+        Title="{Binding [AppTitle], Source={x:Static services:LocalizationService.Instance}}"
+        FlowDirection="{Binding FlowDirection, Source={x:Static services:LocalizationService.Instance}}"
+        Width="1100" Height="700" MinWidth="800" MinHeight="500"
+        Background="{DynamicResource Brush.Window.Background}">
+
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type pvm:PlaceholderViewModel}">
+            <views:PlaceholderView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type pvm:ConnectionViewModel}">
+            <views:ConnectionView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type pvm:VehicleViewModel}">
+            <views:VehicleView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type pvm:ScanViewModel}">
+            <views:ScanView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type pvm:DtcViewModel}">
+            <views:DtcView />
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type pvm:LiveDataViewModel}">
+            <views:LiveDataView />
+        </DataTemplate>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="220" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <Border Grid.Column="0" Background="{DynamicResource Brush.Nav.Background}">
+            <DockPanel LastChildFill="True">
+                <StackPanel DockPanel.Dock="Bottom" Margin="12">
+                    <TextBlock Style="{StaticResource Text.Secondary}" TextWrapping="Wrap" Margin="0,0,0,12" FontSize="12">
+                        <Run Text="{Binding [BackendLabel], Source={x:Static services:LocalizationService.Instance}, Mode=OneWay}" /><Run Text=": " /><Run Text="{Binding BackendName, Mode=OneWay}" />
+                    </TextBlock>
+                    <Button Content="{Binding [ToggleTheme], Source={x:Static services:LocalizationService.Instance}}"
+                            Command="{Binding ToggleThemeCommand}"
+                            Style="{StaticResource Button.Default}" />
+                    <Button Margin="0,8,0,0"
+                            Content="{Binding [ToggleLanguage], Source={x:Static services:LocalizationService.Instance}}"
+                            Command="{Binding ToggleLanguageCommand}"
+                            Style="{StaticResource Button.Default}" />
+                </StackPanel>
+                <TextBlock DockPanel.Dock="Top"
+                           Margin="16,20,16,16"
+                           Text="{Binding [AppHeader], Source={x:Static services:LocalizationService.Instance}}"
+                           Style="{StaticResource Text.Title}"
+                           FontSize="18" />
+                <ListBox ItemsSource="{Binding Navigation.Items}"
+                         SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                         Style="{StaticResource NavListBox}">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock>
+                                <TextBlock.Text>
+                                    <MultiBinding Converter="{StaticResource LocalizeConverter}">
+                                        <Binding Path="TitleKey" />
+                                        <Binding Path="Revision" Source="{x:Static services:LocalizationService.Instance}" />
+                                    </MultiBinding>
+                                </TextBlock.Text>
+                            </TextBlock>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
+
+        <ContentControl Grid.Column="1"
+                        Margin="24"
+                        Content="{Binding Navigation.Current}" />
+    </Grid>
+</Window>

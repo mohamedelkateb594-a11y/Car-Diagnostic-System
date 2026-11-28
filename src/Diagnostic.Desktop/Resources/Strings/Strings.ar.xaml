@@ -1,0 +1,83 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <x:String x:Key="AppTitle">نظام تشخيص السيارات</x:String>
+    <x:String x:Key="AppHeader">تشخيص السيارات</x:String>
+    <x:String x:Key="ToggleTheme">تبديل المظهر</x:String>
+    <x:String x:Key="ToggleLanguage">English</x:String>
+    <x:String x:Key="BackendLabel">المحرك</x:String>
+
+    <x:String x:Key="NavDashboard">لوحة التحكم</x:String>
+    <x:String x:Key="NavConnection">اتصال جهاز VCI</x:String>
+    <x:String x:Key="NavVehicle">السيارة</x:String>
+    <x:String x:Key="NavScan">الفحص الشامل</x:String>
+    <x:String x:Key="NavDtc">أكواد الأعطال (DTC)</x:String>
+    <x:String x:Key="NavLiveData">البيانات الحية</x:String>
+    <x:String x:Key="NavFreezeFrame">لقطة التجميد</x:String>
+    <x:String x:Key="NavReports">التقارير</x:String>
+
+    <x:String x:Key="PlaceholderNotImplemented">هذه الشاشة لم تُنفَّذ بعد.</x:String>
+    <x:String x:Key="TaskLabel">المهمة</x:String>
+
+    <x:String x:Key="SimulatedBadge">محاكاة — بيانات تجريبية وليست من سيارة حقيقية</x:String>
+    <x:String x:Key="NotConnectedHint">اتصل بجهاز VCI أولًا من شاشة اتصال جهاز VCI.</x:String>
+
+    <x:String x:Key="ConnHint">ابحث عن أجهزة VCI المتاحة، اختر جهازًا ثم اتصل به. البحث لا يقوم بالاتصال تلقائيًا.</x:String>
+    <x:String x:Key="ConnDiscover">بحث عن الأجهزة</x:String>
+    <x:String x:Key="ConnConnect">اتصال</x:String>
+    <x:String x:Key="ConnDisconnect">قطع الاتصال</x:String>
+    <x:String x:Key="ConnDevices">الأجهزة المتاحة</x:String>
+    <x:String x:Key="ConnNoDevices">لم يتم العثور على أجهزة.</x:String>
+    <x:String x:Key="ConnDevicesFound">تم العثور على أجهزة. اختر جهازًا ثم اضغط اتصال.</x:String>
+    <x:String x:Key="ConnConnected">تم الاتصال وبدأت جلسة التشخيص.</x:String>
+    <x:String x:Key="ConnDisconnected">تم قطع الاتصال.</x:String>
+
+    <x:String x:Key="VehRead">قراءة هوية السيارة</x:String>
+    <x:String x:Key="VehVin">رقم الهيكل (VIN)</x:String>
+    <x:String x:Key="VehMake">الشركة المصنعة</x:String>
+    <x:String x:Key="VehModel">الطراز</x:String>
+    <x:String x:Key="VehYear">سنة الصنع</x:String>
+    <x:String x:Key="VehEngine">المحرك</x:String>
+    <x:String x:Key="VehMarket">السوق</x:String>
+    <x:String x:Key="VinFormatOk">صيغة رقم الهيكل صحيحة (لم يُتحقق من رقم التحقق).</x:String>
+    <x:String x:Key="VinFormatInvalid">صيغة رقم الهيكل غير صحيحة: يجب أن يكون 17 خانة وألا يحتوي على I أو O أو Q.</x:String>
+
+    <x:String x:Key="ScanRun">تشغيل الفحص الشامل</x:String>
+    <x:String x:Key="ScanEcu">الوحدة</x:String>
+    <x:String x:Key="ScanName">الاسم</x:String>
+    <x:String x:Key="ScanStatus">الحالة</x:String>
+    <x:String x:Key="ScanDtcCount">عدد الأعطال</x:String>
+    <x:String x:Key="ScanNotes">ملاحظات</x:String>
+    <x:String x:Key="EcuStatus_Responded">استجابت</x:String>
+    <x:String x:Key="EcuStatus_NoResponse">لم تستجب</x:String>
+    <x:String x:Key="EcuStatus_Unsupported">غير مدعومة</x:String>
+    <x:String x:Key="EcuStatus_NotAttempted">لم تُجرَّب</x:String>
+    <x:String x:Key="EcuStatus_Error">خطأ</x:String>
+
+    <x:String x:Key="DtcRead">قراءة أكواد الأعطال</x:String>
+    <x:String x:Key="DtcEcu">الوحدة</x:String>
+    <x:String x:Key="DtcCode">الكود</x:String>
+    <x:String x:Key="DtcDescription">الوصف</x:String>
+    <x:String x:Key="DtcStatus">الحالة</x:String>
+    <x:String x:Key="DtcConfirmed">مخزّن</x:String>
+    <x:String x:Key="DtcPending">معلق</x:String>
+    <x:String x:Key="DtcNone">لا توجد أكواد أعطال مسجلة في هذه الوحدة.</x:String>
+    <x:String x:Key="DtcRunScanFirst">شغّل الفحص الشامل أولًا لتظهر الوحدات التي استجابت.</x:String>
+
+    <x:String x:Key="LiveStart">بدء</x:String>
+    <x:String x:Key="LiveStop">إيقاف</x:String>
+    <x:String x:Key="LiveEcu">الوحدة</x:String>
+    <x:String x:Key="LiveParams">معرّفات المعاملات (مفصولة بفاصلة، فارغ = كل ما تدعمه الوحدة)</x:String>
+
+    <x:String x:Key="OpStatus_Success">تمت العملية بنجاح.</x:String>
+    <x:String x:Key="OpStatus_PartialSuccess">تمت العملية جزئيًا — قد تكون البيانات ناقصة (انظر التفاصيل).</x:String>
+    <x:String x:Key="OpStatus_Unsupported">غير مدعوم.</x:String>
+    <x:String x:Key="OpStatus_NotApplicable">غير منطبق.</x:String>
+    <x:String x:Key="OpStatus_NotConnected">غير متصل.</x:String>
+    <x:String x:Key="OpStatus_Timeout">انتهت المهلة.</x:String>
+    <x:String x:Key="OpStatus_Cancelled">أُلغيت العملية.</x:String>
+    <x:String x:Key="OpStatus_InvalidResponse">استجابة غير صالحة.</x:String>
+    <x:String x:Key="OpStatus_TransportError">خطأ في النقل.</x:String>
+    <x:String x:Key="OpStatus_ProtocolError">خطأ في البروتوكول.</x:String>
+    <x:String x:Key="OpStatus_SafetyPreconditionFailed">فشل أحد شروط السلامة.</x:String>
+    <x:String x:Key="OpStatus_Failed">فشلت العملية.</x:String>
+</ResourceDictionary>
