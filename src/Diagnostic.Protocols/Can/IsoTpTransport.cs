@@ -50,7 +50,10 @@ public sealed class IsoTpTransport
         _time = timeProvider ?? TimeProvider.System;
     }
 
-    /// <summary>Sends one service payload and returns the reassembled response payload.</summary>
+    /// <summary>
+    /// Sends one service payload and returns the reassembled response payload. A "response pending"
+    /// reply (7F, service, 78) is followed by waiting for the final response within the same timeout.
+    /// </summary>
     public async Task<ParseResult<byte[]>> ExchangeAsync(byte[] request, TimeSpan timeout, CancellationToken ct)
     {
         ArgumentNullException.ThrowIfNull(request);
@@ -60,6 +63,7 @@ public sealed class IsoTpTransport
             return Fail(OperationStatus.Failed, "InvalidRequest", "Invalid payload length or timeout.");
         }
 
+        byte[]? pending = null;
         using var deadline = new CancellationTokenSource(timeout, _time);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct, deadline.Token);
         try
@@ -68,7 +72,21 @@ public sealed class IsoTpTransport
             try
             {
                 var failure = await SendMessageAsync(request, linked.Token);
-                return failure ?? await ReceiveMessageAsync(linked.Token);
+                if (failure is not null)
+                {
+                    return failure;
+                }
+
+                while (true)
+                {
+                    var response = await ReceiveMessageAsync(linked.Token);
+                    if (response.Value is not [0x7F, var service, 0x78] || service != request[0])
+                    {
+                        return response;
+                    }
+
+                    pending = response.Value;
+                }
             }
             finally
             {
@@ -78,6 +96,14 @@ public sealed class IsoTpTransport
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
             return Fail(OperationStatus.Cancelled, "Cancelled", "The exchange was cancelled.");
+        }
+        catch (OperationCanceledException) when (pending is not null)
+        {
+            // The original reply is kept in the message.
+            return Fail(
+                OperationStatus.Timeout,
+                "ResponsePendingTimeout",
+                $"No final response after {ServiceResponse.Hex(pending)}.");
         }
         catch (OperationCanceledException)
         {
