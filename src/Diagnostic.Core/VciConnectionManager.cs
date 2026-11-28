@@ -7,6 +7,10 @@ namespace Diagnostic.Core;
 /// Device discovery, connection and disconnection over one <see cref="IVciAdapter"/>.
 /// Discovery never connects. All adapter calls are serialized.
 /// </summary>
+/// <remarks>
+/// Awaits here use ConfigureAwait(false): a desktop application may block its UI thread while it closes
+/// the engine, and the connection gate must still be released. Adapters should do the same.
+/// </remarks>
 public sealed class VciConnectionManager : IAsyncDisposable
 {
     private readonly IVciAdapter _adapter;
@@ -63,14 +67,14 @@ public sealed class VciConnectionManager : IAsyncDisposable
                     _options.RequestTimeout + _options.AdapterGracePeriod,
                     Time,
                     _simulated,
-                    token);
+                    token).ConfigureAwait(false);
             },
             ct);
 
     public async ValueTask DisposeAsync()
     {
         _connected = null;
-        await _adapter.DisposeAsync();
+        await _adapter.DisposeAsync().ConfigureAwait(false);
     }
 
     // Temporary decision (AdapterInfo cannot express simulation): a simulated adapter says
@@ -83,7 +87,7 @@ public sealed class VciConnectionManager : IAsyncDisposable
     {
         try
         {
-            await _gate.WaitAsync(ct);
+            await _gate.WaitAsync(ct).ConfigureAwait(false);
         }
         catch (OperationCanceledException)
         {
@@ -92,7 +96,7 @@ public sealed class VciConnectionManager : IAsyncDisposable
 
         try
         {
-            return await action(ct);
+            return await action(ct).ConfigureAwait(false);
         }
         finally
         {
@@ -104,7 +108,7 @@ public sealed class VciConnectionManager : IAsyncDisposable
         AdapterGuard.ExecuteAsync<IReadOnlyList<AdapterInfo>>(
             async token =>
             {
-                var adapters = await _adapter.DiscoverAsync(token);
+                var adapters = await _adapter.DiscoverAsync(token).ConfigureAwait(false);
                 return new OperationResult<IReadOnlyList<AdapterInfo>>(
                     OperationStatus.Success,
                     adapters,
@@ -139,7 +143,7 @@ public sealed class VciConnectionManager : IAsyncDisposable
         }
 
         _connected = null;
-        var discovery = await DiscoverCoreAsync(ct);
+        var discovery = await DiscoverCoreAsync(ct).ConfigureAwait(false);
         if (discovery.Data is null)
         {
             return Results.Fail<AdapterInfo>(
@@ -163,14 +167,14 @@ public sealed class VciConnectionManager : IAsyncDisposable
             _options.ConnectionTimeout,
             Time,
             looksSimulated,
-            ct);
+            ct).ConfigureAwait(false);
 
         if (connect.Status != OperationStatus.Success)
         {
             if (connect.Status is OperationStatus.Timeout or OperationStatus.Cancelled)
             {
                 // Release whatever a late or half-finished connection may hold.
-                await DisconnectCoreAsync(CancellationToken.None);
+                await DisconnectCoreAsync(CancellationToken.None).ConfigureAwait(false);
             }
 
             return new OperationResult<AdapterInfo>(
@@ -191,7 +195,7 @@ public sealed class VciConnectionManager : IAsyncDisposable
             _options.ConnectionTimeout,
             Time,
             _simulated,
-            ct);
+            ct).ConfigureAwait(false);
 
         if (result.Status == OperationStatus.Success || !_adapter.IsConnected)
         {
