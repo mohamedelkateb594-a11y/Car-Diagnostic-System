@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Contracts\Contracts.csproj" />
+    <ProjectReference Include="..\Adapters.Abstractions\Adapters.Abstractions.csproj" />
+    <ProjectReference Include="..\Diagnostic.Core\Diagnostic.Core.csproj" />
+  </ItemGroup>
+
+</Project>

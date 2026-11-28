@@ -1,0 +1,14 @@
+# Build output
+bin/
+obj/
+TestResults/
+
+# IDE
+.vs/
+*.user
+
+# Local settings and secrets
+*.local.json
+.env
+*.pfx
+*.snk
