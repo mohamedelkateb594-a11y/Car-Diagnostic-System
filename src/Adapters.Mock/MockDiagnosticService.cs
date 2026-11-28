@@ -1,3 +1,4 @@
+using Adapters.Abstractions;
 using Contracts;
 using Diagnostic.Core;
 
@@ -5,7 +6,8 @@ namespace Adapters.Mock;
 
 /// <summary>
 /// Ready-to-use SIMULATED diagnostic service: the real Core running over <see cref="MockVciAdapter"/>.
-/// Register it as <see cref="IDiagnosticService"/> and expose <see cref="Connection"/> for discovery.
+/// Register it as <see cref="IDiagnosticService"/> and <see cref="ManagedAdapter"/> as
+/// <see cref="IVciAdapter"/>.
 /// </summary>
 public sealed class MockDiagnosticService : IDiagnosticService, IAsyncDisposable
 {
@@ -15,12 +17,17 @@ public sealed class MockDiagnosticService : IDiagnosticService, IAsyncDisposable
     {
         Adapter = adapter ?? new MockVciAdapter();
         Connection = new VciConnectionManager(Adapter, options);
+        ManagedAdapter = new ManagedVciAdapter(Connection);
         _service = new DiagnosticService(Connection);
     }
 
+    /// <summary>The raw mock adapter, for fault injection and custom responses.</summary>
     public MockVciAdapter Adapter { get; }
 
     public VciConnectionManager Connection { get; }
+
+    /// <summary>Pass this one to consumers of <see cref="IVciAdapter"/>.</summary>
+    public IVciAdapter ManagedAdapter { get; }
 
     public Task<OperationResult<DiagnosticSessionInfo>> StartSessionAsync(
         string adapterId, VehicleIdentity? manualVehicle, CancellationToken ct) =>

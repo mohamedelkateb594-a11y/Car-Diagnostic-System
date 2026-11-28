@@ -205,10 +205,10 @@ public sealed class DiagnosticService : IDiagnosticService
             return UnknownEcu<IReadOnlyList<LiveDataPoint>>(session);
         }
 
-        if (parameterIds is null || parameterIds.Count == 0)
+        if (parameterIds is null)
         {
             return Result<IReadOnlyList<LiveDataPoint>>(
-                session, OperationStatus.Failed, null, "No parameters were requested.", "InvalidArgument");
+                session, OperationStatus.Failed, null, "No parameter list was given.", "InvalidArgument");
         }
 
         var support = await GetSupportedPidsAsync(session, ct);
@@ -217,6 +217,25 @@ public sealed class DiagnosticService : IDiagnosticService
             // Unknown support is never treated as support.
             return Result<IReadOnlyList<LiveDataPoint>>(
                 session, support.Status, null, support.Message, support.ErrorCode);
+        }
+
+        // Temporary decision (the contract is silent): an empty list requests every decodable
+        // parameter that the ECU reports as supported.
+        if (parameterIds.Count == 0)
+        {
+            parameterIds = Obd2PidCatalog.All
+                .Where(d => support.Data.Contains(d.Pid))
+                .Select(d => d.ParameterId)
+                .ToArray();
+            if (parameterIds.Count == 0)
+            {
+                return Result<IReadOnlyList<LiveDataPoint>>(
+                    session,
+                    OperationStatus.Unsupported,
+                    null,
+                    "The ECU reports no decodable parameter.",
+                    "ParameterUnavailable");
+            }
         }
 
         var points = new List<LiveDataPoint>();
