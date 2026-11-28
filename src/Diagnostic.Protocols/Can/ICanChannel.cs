@@ -12,4 +12,10 @@ public interface ICanChannel
     Task SendAsync(CanFrame frame, CancellationToken ct);
 
     Task<CanFrame> ReceiveAsync(CancellationToken ct);
+
+    /// <summary>
+    /// Discards every frame received before this call (for example by clearing the driver's receive
+    /// buffer). It must return without waiting for new frames.
+    /// </summary>
+    Task DiscardReceivedAsync(CancellationToken ct);
 }

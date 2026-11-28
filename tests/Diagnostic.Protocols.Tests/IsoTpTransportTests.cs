@@ -282,5 +282,8 @@ public class IsoTpTransportTests
         }
 
         public async Task<CanFrame> ReceiveAsync(CancellationToken ct) => await _incoming.Reader.ReadAsync(ct);
+
+        // These tests only queue frames in response to a sent frame.
+        public Task DiscardReceivedAsync(CancellationToken ct) => Task.CompletedTask;
     }
 }
