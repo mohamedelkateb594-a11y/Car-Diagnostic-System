@@ -77,7 +77,7 @@ public sealed class IsoTpVciAdapter : IVciAdapter
         }
         catch (Exception ex)
         {
-            await ReleaseAsync(channel);
+            await ReleaseAsync(channel).ConfigureAwait(false);
             return Result(
                 OperationStatus.TransportError, false, $"{ex.GetType().Name}: {ex.Message}", "ChannelOpenFailed");
         }
@@ -92,7 +92,7 @@ public sealed class IsoTpVciAdapter : IVciAdapter
 
         try
         {
-            await CloseAsync();
+            await CloseAsync().ConfigureAwait(false);
             return Result(OperationStatus.Success, true, null, null);
         }
         catch (Exception ex)
@@ -115,14 +115,14 @@ public sealed class IsoTpVciAdapter : IVciAdapter
             return Result<byte[]>(OperationStatus.Failed, null, "A request is required.", "InvalidArgument");
         }
 
-        var exchange = await transport.ExchangeAsync(request, timeout, ct);
+        var exchange = await transport.ExchangeAsync(request, timeout, ct).ConfigureAwait(false);
         return Result(exchange.Status, exchange.Value, exchange.Message, exchange.ErrorCode);
     }
 
     public async ValueTask DisposeAsync()
     {
         _disposed = true;
-        await CloseAsync();
+        await CloseAsync().ConfigureAwait(false);
     }
 
     private static async ValueTask ReleaseAsync(ICanChannel? channel)
@@ -130,7 +130,7 @@ public sealed class IsoTpVciAdapter : IVciAdapter
         switch (channel)
         {
             case IAsyncDisposable asyncDisposable:
-                await asyncDisposable.DisposeAsync();
+                await asyncDisposable.DisposeAsync().ConfigureAwait(false);
                 break;
             case IDisposable disposable:
                 disposable.Dispose();
@@ -143,7 +143,7 @@ public sealed class IsoTpVciAdapter : IVciAdapter
         var channel = _channel;
         _channel = null;
         _transport = null;
-        await ReleaseAsync(channel);
+        await ReleaseAsync(channel).ConfigureAwait(false);
     }
 
     private OperationResult<T> Result<T>(OperationStatus status, T? data, string? message, string? errorCode) =>

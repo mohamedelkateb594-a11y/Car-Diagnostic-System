@@ -26,7 +26,7 @@ public sealed class ManagedVciAdapter : IVciAdapter
     /// </summary>
     public async Task<IReadOnlyList<AdapterInfo>> DiscoverAsync(CancellationToken ct)
     {
-        var result = await _connection.DiscoverAsync(ct);
+        var result = await _connection.DiscoverAsync(ct).ConfigureAwait(false);
         if (result.Data is not null)
         {
             return result.Data;
@@ -38,7 +38,7 @@ public sealed class ManagedVciAdapter : IVciAdapter
 
     public async Task<OperationResult<bool>> ConnectAsync(string adapterId, CancellationToken ct)
     {
-        var result = await _connection.ConnectAsync(adapterId, ct);
+        var result = await _connection.ConnectAsync(adapterId, ct).ConfigureAwait(false);
         return new OperationResult<bool>(
             result.Status,
             result.Status == OperationStatus.Success,
@@ -64,5 +64,6 @@ public sealed class ManagedVciAdapter : IVciAdapter
     }
 
     /// <summary>Releases the connection. The manager keeps ownership of the underlying adapter.</summary>
-    public async ValueTask DisposeAsync() => await _connection.DisconnectAsync(CancellationToken.None);
+    public async ValueTask DisposeAsync() =>
+        await _connection.DisconnectAsync(CancellationToken.None).ConfigureAwait(false);
 }

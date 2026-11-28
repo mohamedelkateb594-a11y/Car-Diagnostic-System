@@ -20,17 +20,17 @@ internal static class AdapterGuard
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(ct);
         try
         {
-            return await operation(linked.Token).WaitAsync(timeout, time, ct);
+            return await operation(linked.Token).WaitAsync(timeout, time, ct).ConfigureAwait(false);
         }
         catch (TimeoutException)
         {
-            await linked.CancelAsync();
+            await linked.CancelAsync().ConfigureAwait(false);
             return Results.Fail<T>(
                 OperationStatus.Timeout, "Timeout", "The adapter did not answer in time.", time, simulated);
         }
         catch (OperationCanceledException) when (ct.IsCancellationRequested)
         {
-            await linked.CancelAsync();
+            await linked.CancelAsync().ConfigureAwait(false);
             return Results.Cancelled<T>(time, simulated);
         }
         catch (Exception ex)
