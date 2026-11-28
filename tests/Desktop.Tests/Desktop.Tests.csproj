@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Windows-only tests for the WPF shell (navigation, localization, DI composition).
+       The logic tests live in tests/Diagnostic.Presentation.Tests and run in the shared CI.
+       Not part of CarDiagnosticSystem.sln because the shared CI runs on Linux. -->
+  <PropertyGroup>
+    <!-- xUnit v3 test projects are executables. -->
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>Desktop.Tests</RootNamespace>
+    <NoWarn>$(NoWarn);xUnit1051</NoWarn>
+  </PropertyGroup>
+
+  <!-- Same package versions as tests/Diagnostic.Core.Tests, which the shared CI already restores. -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
+    <PackageReference Include="xunit.v3" Version="3.2.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Diagnostic.Desktop\Diagnostic.Desktop.csproj" />
+  </ItemGroup>
+
+</Project>
