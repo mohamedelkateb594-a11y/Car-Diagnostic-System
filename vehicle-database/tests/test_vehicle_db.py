@@ -41,6 +41,32 @@ class Search(unittest.TestCase):
         self.assertEqual(risk["Input/output control by identifier"], "actuate")
         self.assertEqual(risk["Write data by identifier"], "write")
 
+class DtcStatus(unittest.TestCase):
+    def setUp(self): self.c = fresh()
+    def rows(self):
+        return self.c.execute("""SELECT d.code, d.is_generic, s.key, s.url, s.retrieved_at, s.verification, s.notes
+                                 FROM dtc_definitions d JOIN data_sources s ON s.id=d.source_id ORDER BY d.code""").fetchall()
+    def test_26_codes_all_traceable(self):
+        r = self.rows(); self.assertEqual(len(r), 26)
+        for x in r:
+            self.assertTrue(x["url"] and x["retrieved_at"] and x["notes"], x["code"])
+    def test_status_counts_and_no_verified(self):
+        v = [x["verification"] for x in self.rows()]
+        self.assertEqual((v.count("cross_checked"), v.count("standard"), v.count("verified")), (24, 2, 0))
+    def test_oem_specific_codes_not_generic_and_unchecked(self):
+        for x in self.rows():
+            if x["code"] in ("B0001", "C0035"):
+                self.assertEqual(x["is_generic"], 0); self.assertEqual(x["verification"], "standard"); self.assertIn("UNCHECKED", x["notes"])
+            else:
+                self.assertEqual(x["is_generic"], 1); self.assertEqual(x["verification"], "cross_checked")
+    def test_previously_unchecked_codes_have_own_source(self):
+        want = ["P0171","P0300","P0301","P0302","P0303","P0304","P0420","U0100","U0121","B0001","C0035"]
+        got = {x["code"]: x["key"] for x in self.rows()}
+        for c in want: self.assertEqual(got[c], "dtc-" + c.lower())
+    def test_is_generic_must_be_boolean(self):
+        p = Import().payload(); p["dtcs"][0]["is_generic"] = "no"
+        self.assertTrue(any("is_generic" in e for e in validate_payload(p)))
+
 class Decode(unittest.TestCase):
     def test_pids(self):
         c = fresh()

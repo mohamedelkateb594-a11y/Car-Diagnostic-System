@@ -45,6 +45,7 @@ def validate_payload(p):
         w = f"dtc '{d.get('code')}'"
         if not DTC_RE.match(str(d.get("code", ""))): e.append(f"{w}: invalid code format")
         if not d.get("description"): e.append(f"{w}: missing description")
+        if "is_generic" in d and not isinstance(d["is_generic"], bool): e.append(f"{w}: is_generic must be boolean")
         src(d, w)
     for d in p.get("pids", []):
         w = f"pid {d.get('service')}/{d.get('pid')}"
@@ -119,7 +120,7 @@ def import_payload(conn, p):
         for e_ in p.get("generic_ecus", []): ecu(e_, None)
         for d in p.get("dtcs", []):
             _, new = _upsert(conn, "dtc_definitions", {"code": d["code"], "manufacturer_id": None},
-                {"system": d["code"][0], "is_generic": 1, "description": d["description"], "source_id": sid[d["source"]]}); n("dtcs", new)
+                {"system": d["code"][0], "is_generic": 0 if d.get("is_generic") is False else 1, "description": d["description"], "source_id": sid[d["source"]]}); n("dtcs", new)
         for d in p.get("pids", []):
             _, new = _upsert(conn, "pid_definitions", {"service": d["service"], "pid": d["pid"]},
                 {k: d.get(k) for k in ("name", "num_bytes", "formula", "unit", "min_value", "max_value")} | {"source_id": sid[d["source"]]}); n("pids", new)

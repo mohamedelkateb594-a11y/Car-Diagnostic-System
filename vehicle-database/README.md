@@ -9,20 +9,20 @@ get_vehicle_profile(c, variant_id)      # ECUs + services (risk_level read/write
 lookup_dtc(c, "P0300")
 apply_update_package(c, pkg)            # runtime data update, no app rebuild
 ```
-Import payload: see `vehicle_db/seed/seed_data.json`. Every record needs `source` (key into `sources`, which requires `license` and `verification`). Sources marked `cross_checked` or `verified` must also have `url`, `retrieved_at` and `notes` (enforced by the validator).
+Import payload: see `vehicle_db/seed/seed_data.json`. Every record needs `source` (key into `sources`, which requires `license` and `verification`). Sources marked `cross_checked` or `verified` must also have `url`, `retrieved_at` and `notes` (enforced by the validator). DTC records accept an optional boolean `is_generic` (default true; set false for manufacturer-specific codes).
 
 ## Verification levels (`data_sources.verification`)
 | level | meaning |
 |---|---|
-| `standard` | public standard identifier, not yet independently cross-checked |
-| `cross_checked` | confirmed against 2+ public secondary sources (URLs in `notes`); NOT OEM documentation |
-| `verified` | confirmed against OEM / official documentation (none yet) |
+| `standard` | public standard identifier, not yet independently cross-checked (also used for UNCHECKED OEM-specific codes, see their notes) |
+| `cross_checked` | confirmed against 2+ public sources (URLs in `notes`), including OEM bulletins hosted by NHTSA where available; NOT the SAE/ISO standard text |
+| `verified` | confirmed against the standard text or OEM definition documentation (none yet) |
 | `sample_unverified` | illustrative only |
 
 ## Data status (as of 2026-11-28)
-- **Vehicles (6 models, 9 engines):** `cross_checked` against Wikipedia, NHTSA TSBs, and parts/fitment catalogs. Each source's `notes` lists the cross-check URLs and discrepancies (e.g. Hyundai Elantra AD 1.6 engine code is market-dependent: G4FG vs G4FC; Toyota 2ZR-FXE displacement 1797 vs 1798 cc).
+- **Vehicles (6 models, 9 engines):** `cross_checked`. Each source's `notes` lists the cross-check URLs and discrepancies (e.g. Hyundai Elantra AD 1.6 engine code is market-dependent: G4FG vs G4FC; Toyota 2ZR-FXE displacement 1797 vs 1798 cc).
 - **PIDs:** all 15 formulas cross-checked.
-- **DTCs:** 15 of 26 cross-checked (source `sae-j2012-dtc`); 11 not yet (source `sae-j2012-dtc-unchecked`: P0171, P0300-P0304, P0420, U0100, U0121, B0001, C0035).
+- **DTCs (26):** 24 `cross_checked`, 2 UNCHECKED (B0001, C0035: OEM-specific, `is_generic = 0`), 0 `verified`. Full per-code status, sources and variances: [docs/DTC_VERIFICATION_REPORT.md](docs/DTC_VERIFICATION_REPORT.md).
 - **UDS services/DIDs, CAN IDs:** project-written, not yet cross-checked. Verify against SAE J1979/J2012 and ISO 14229/15765 before release.
 - Update packages: sha256 integrity only; add signature verification before remote distribution (hook: `updater._verify_integrity`).
 - Python was chosen because the project stack was not known; schema.sql + JSON formats are language-neutral.
